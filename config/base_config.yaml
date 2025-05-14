@@ -1,0 +1,74 @@
+# Base configuration for OHB Simulation Model
+
+# Simulation parameters
+simulation:
+  time_interval: "MONTHLY"
+  fiscal_year_start_month: 4
+  fiscal_year_start_day: 1
+
+# States in the process flow
+states:
+  eligible_population:
+    id: "eligible"
+    name: "Eligible Population"
+    reset_on_fiscal_year: false
+  
+  re_enrollment_eligible_population:
+    id: "re_enrollment_eligible"
+    name: "Re-enrollment Eligible Population"
+    reset_on_fiscal_year: false
+  
+  applied_population:
+    id: "applied"
+    name: "Applied Population"
+    reset_on_fiscal_year: false
+  
+  enrolled_inactive_population:
+    id: "enrolled_inactive"
+    name: "Enrolled Inactive Population"
+    reset_on_fiscal_year: true
+  
+  active_claimant_population:
+    id: "active_claimant"
+    name: "Active Claimant Population"
+    reset_on_fiscal_year: true
+
+# Flows between states
+flows:
+  new_applications:
+    id: "new_applications"
+    source: "eligible"
+    target: "applied"
+  
+  new_re_enrollment_applications:
+    id: "new_re_enrollment_applications"
+    source: "re_enrollment_eligible"
+    target: "applied"
+  
+  new_enrollments:
+    id: "new_enrollments"
+    source: "applied"
+    target: "enrolled_inactive"
+  
+  new_re_enrollment:
+    id: "new_re_enrollment"
+    source: "applied"
+    target: "enrolled_inactive"
+  
+  new_first_claimants:
+    id: "new_first_claimants"
+    source: "enrolled_inactive"
+    target: "active_claimant"
+
+# Default flow rates
+flow_rates:
+  new_applications: 0.05         # 5% of eligible population applies each month
+  new_re_enrollment_applications: 0.15  # 15% of re-enrollment eligible applies each month
+  new_enrollments: 0.80          # 80% of applications are approved
+  new_re_enrollment: 0.90        # 90% of re-enrollment applications are approved
+  new_first_claimants: 0.20      # 20% of inactive enrollees become first-time claimants each month
+
+  # Cohort-specific rates
+  new_applications_seniors_65plus: 0.08    # Higher application rate for seniors
+  new_applications_pwd_all: 0.10           # Higher application rate for PWD
+  new_applications_children_u18: 0.07      # Higher application rate for children

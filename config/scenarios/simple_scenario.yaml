@@ -1,0 +1,133 @@
+# Simple scenario configuration for OHB Simulation Model
+# This extends the base configuration with scenario-specific settings
+
+# Regions for simulation
+regions:
+  - region_id: "on"
+    region_name: "Ontario"
+  - region_id: "bc"
+    region_name: "British Columbia"
+  - region_id: "ab"
+    region_name: "Alberta"
+
+# Population segments for simulation
+population_segments:
+  # Ontario Segments
+  - segment_id: "seniors_65plus_on"
+    cohort_type: "seniors"
+    region_id: "on"
+    age_min: 65
+    age_max: 120
+    age_bracket_name: "65plus"
+    population_size: 100000
+
+  - segment_id: "pwd_18to64_on"
+    cohort_type: "pwd"
+    region_id: "on"
+    age_min: 18
+    age_max: 64
+    age_bracket_name: "18to64"
+    population_size: 20000
+
+  - segment_id: "children_u18_on"
+    cohort_type: "children"
+    region_id: "on"
+    age_min: 0
+    age_max: 17
+    age_bracket_name: "u18"
+    population_size: 80000
+
+  - segment_id: "adults_18to64_on"
+    cohort_type: "adults"
+    region_id: "on"
+    age_min: 18
+    age_max: 64
+    age_bracket_name: "18to64"
+    population_size: 300000
+
+  # British Columbia Segments
+  - segment_id: "seniors_65plus_bc"
+    cohort_type: "seniors"
+    region_id: "bc"
+    age_min: 65
+    age_max: 120
+    age_bracket_name: "65plus"
+    population_size: 50000
+
+  - segment_id: "pwd_18to64_bc"
+    cohort_type: "pwd"
+    region_id: "bc"
+    age_min: 18
+    age_max: 64
+    age_bracket_name: "18to64"
+    population_size: 10000
+
+  - segment_id: "children_u18_bc"
+    cohort_type: "children"
+    region_id: "bc"
+    age_min: 0
+    age_max: 17
+    age_bracket_name: "u18"
+    population_size: 40000
+
+  - segment_id: "adults_18to64_bc"
+    cohort_type: "adults"
+    region_id: "bc"
+    age_min: 18
+    age_max: 64
+    age_bracket_name: "18to64"
+    population_size: 150000
+
+  # Alberta Segments
+  - segment_id: "seniors_65plus_ab"
+    cohort_type: "seniors"
+    region_id: "ab"
+    age_min: 65
+    age_max: 120
+    age_bracket_name: "65plus"
+    population_size: 30000
+
+  - segment_id: "pwd_18to64_ab"
+    cohort_type: "pwd"
+    region_id: "ab"
+    age_min: 18
+    age_max: 64
+    age_bracket_name: "18to64"
+    population_size: 5000
+
+  - segment_id: "children_u18_ab"
+    cohort_type: "children"
+    region_id: "ab"
+    age_min: 0
+    age_max: 17
+    age_bracket_name: "u18"
+    population_size: 25000
+
+  - segment_id: "adults_18to64_ab"
+    cohort_type: "adults"
+    region_id: "ab"
+    age_min: 18
+    age_max: 64
+    age_bracket_name: "18to64"
+    population_size: 90000
+
+# Scenario-specific flow rates (overrides base config rates where specified)
+flow_rates:
+  # Adult population has lower application rate
+  new_applications_adults_18to64: 0.03
+
+  # Regional adjustments
+  new_applications_seniors_65plus_on: 0.09  # Ontario seniors have higher application rate
+  new_applications_pwd_all_bc: 0.12         # BC PWD population has higher application rate
+  
+  # Subsequent flow rates for this scenario
+  new_subsequent_claimants: 0.30            # 30% of active claimants make subsequent claims each month
+
+# Distributions for applying variation to rates
+distributions:
+  # Add random variation to application rates with normal distribution
+  new_applications_distribution:
+    type: "normal"
+    params:
+      mean: 1.0
+      stddev: 0.1
