@@ -19,7 +19,8 @@ class ProcessResult:
     """
     
     def __init__(self, source_state, target_state, population_count, 
-                success_count=0, failure_count=0, segment_id=None, flow_id=None):
+                success_count=0, failure_count=0, segment_id=None, flow_id=None,
+                region_id=None, cohort_type=None, age_bracket=None):
         """
         Initialize with process result data.
         
@@ -31,6 +32,9 @@ class ProcessResult:
             failure_count (int, optional): Number of failed transitions.
             segment_id (str, optional): Population segment identifier.
             flow_id (str, optional): Flow identifier.
+            region_id (str, optional): Region identifier.
+            cohort_type (str, optional): Cohort type.
+            age_bracket (str, optional): Age bracket.
         """
         self.source_state = source_state
         self.target_state = target_state
@@ -39,6 +43,9 @@ class ProcessResult:
         self.failure_count = failure_count
         self.segment_id = segment_id
         self.flow_id = flow_id
+        self.region_id = region_id
+        self.cohort_type = cohort_type
+        self.age_bracket = age_bracket
         
         # Financial impact data (to be set later if applicable)
         self.financial_impact = 0.0
@@ -92,20 +99,48 @@ class ProcessResult:
         # Update flow metrics
         if self.flow_id:
             statistics_tracker.update_flow_metric(
-                self.flow_id, period, self.success_count, self.segment_id
+                flow_id=self.flow_id, 
+                period=period, 
+                count=self.success_count, 
+                segment_id=self.segment_id,
+                region_id=self.region_id,
+                cohort_type=self.cohort_type,
+                age_bracket=self.age_bracket
             )
         
         # Update financial metrics if applicable
         if self.financial_impact > 0:
             statistics_tracker.update_financial_metric(
-                'claim_expenditure', period, self.financial_impact, self.segment_id
+                metric_id='claim_expenditure',
+                period=period, 
+                amount=self.financial_impact, 
+                segment_id=self.segment_id,
+                region_id=self.region_id,
+                cohort_type=self.cohort_type,
+                age_bracket=self.age_bracket
             )
-            statistics_tracker.update_financial_metric(
-                'program_expenditure', period, self.program_payment, self.segment_id
-            )
-            statistics_tracker.update_financial_metric(
-                'patient_expenditure', period, self.patient_payment, self.segment_id
-            )
+            
+            if self.program_payment > 0:
+                statistics_tracker.update_financial_metric(
+                    metric_id='program_expenditure',
+                    period=period, 
+                    amount=self.program_payment, 
+                    segment_id=self.segment_id,
+                    region_id=self.region_id,
+                    cohort_type=self.cohort_type,
+                    age_bracket=self.age_bracket
+                )
+            
+            if self.patient_payment > 0:
+                statistics_tracker.update_financial_metric(
+                    metric_id='patient_expenditure',
+                    period=period, 
+                    amount=self.patient_payment, 
+                    segment_id=self.segment_id,
+                    region_id=self.region_id,
+                    cohort_type=self.cohort_type,
+                    age_bracket=self.age_bracket
+                )
     
     def __str__(self):
         """Return string representation of the ProcessResult."""

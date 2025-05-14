@@ -270,3 +270,48 @@ class Simulation:
         """
         # For Phase 1, just return the simulation results
         return self.get_simulation_results()
+
+    def export_results(self, output_path, formats=None):
+        """
+        Export simulation results to specified formats.
+        
+        Args:
+            output_path (str): Base path for output files (without extension).
+            formats (list, optional): List of format strings ('json', 'csv'). 
+                                      If None, exports to JSON only.
+            
+        Returns:
+            dict: Dictionary mapping formats to file paths.
+        """
+        if formats is None:
+            formats = ['json']
+        
+        results = self.get_simulation_results()
+        file_paths = {}
+        
+        # Export to JSON
+        if 'json' in formats:
+            json_path = f"{output_path}.json"
+            import json
+            with open(json_path, 'w') as f:
+                json.dump(results, f, indent=2, default=str)
+            file_paths['json'] = json_path
+        
+        # Export to CSV
+        if 'csv' in formats:
+            csv_paths = self.statistics_tracker.export_to_csv(output_path)
+            file_paths['csv'] = csv_paths
+            
+            # Also export simulation parameters
+            params_path = f"{output_path}_simulation_params.csv"
+            param_rows = []
+            for key, value in results['simulation_params'].items():
+                param_rows.append(f"{key},{value}")
+            
+            with open(params_path, 'w') as f:
+                f.write("parameter,value\n")
+                f.write("\n".join(param_rows))
+            
+            file_paths['csv']['params'] = params_path
+        
+        return file_paths

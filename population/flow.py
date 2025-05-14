@@ -101,7 +101,11 @@ class PopulationFlow:
         if success_count <= 0:
             return None  # No successful transitions
         
-        # Create process result
+        # Create process result with segment information
+        region_id = population_segment.region_id
+        cohort_type = population_segment.cohort_type
+        age_bracket = population_segment.age_bracket.bracket_name
+        
         result = ProcessResult(
             source_state=self.source_state,
             target_state=self.target_state,
@@ -109,7 +113,10 @@ class PopulationFlow:
             success_count=success_count,
             failure_count=0,
             segment_id=population_segment.segment_id,
-            flow_id=self.flow_id
+            flow_id=self.flow_id,
+            region_id=region_id,
+            cohort_type=cohort_type,
+            age_bracket=age_bracket
         )
         
         return result

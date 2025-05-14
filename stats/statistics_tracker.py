@@ -693,3 +693,14 @@ class StatisticsTracker:
         return {
             "metrics": self.metrics
         }
+
+    def export_to_dict(self):
+        """
+        Export metrics to a dictionary suitable for JSON serialization.
+        
+        Returns:
+            dict: Dictionary with metrics in normalized format.
+        """
+        return {
+            "metrics": self.metrics
+        }

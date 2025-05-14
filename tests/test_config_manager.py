@@ -6,7 +6,7 @@ import os
 import unittest
 import tempfile
 import yaml
-from ohb_simulation.core.config_manager import ConfigurationManager
+from core.config_manager import ConfigurationManager
 
 
 class TestConfigurationManager(unittest.TestCase):

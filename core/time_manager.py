@@ -142,10 +142,12 @@ class TimeManager:
         Returns:
             str: String representing the fiscal year (e.g., "FY2025").
         """
-        if self.current_date < self.fiscal_year_start_date:
-            year = self.fiscal_year_start_date.year - 1
+        if (self.current_date.month > self.fiscal_year_start_month or 
+            (self.current_date.month == self.fiscal_year_start_month and 
+            self.current_date.day >= self.fiscal_year_start_day)):
+            year = self.current_date.year
         else:
-            year = self.fiscal_year_start_date.year
+            year = self.current_date.year - 1
             
         return f"FY{year}"
     

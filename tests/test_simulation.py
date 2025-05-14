@@ -7,7 +7,7 @@ import unittest
 import tempfile
 import yaml
 import datetime
-from ohb_simulation.core.simulation import Simulation
+from core.simulation import Simulation
 
 
 class TestSimulation(unittest.TestCase):
@@ -49,11 +49,11 @@ class TestSimulation(unittest.TestCase):
                 'fiscal_year_start_day': 1
             },
             'states': {
-                'eligible': {'id': 'eligible', 'name': 'Eligible Population', 'reset_on_fiscal_year': False},
-                're_enrollment_eligible': {'id': 're_enrollment_eligible', 'name': 'Re-enrollment Eligible', 'reset_on_fiscal_year': False},
-                'applied': {'id': 'applied', 'name': 'Applied Population', 'reset_on_fiscal_year': False},
-                'enrolled_inactive': {'id': 'enrolled_inactive', 'name': 'Enrolled Inactive', 'reset_on_fiscal_year': True},
-                'active_claimant': {'id': 'active_claimant', 'name': 'Active Claimant', 'reset_on_fiscal_year': True}
+                'eligible_population': {'id': 'eligible', 'name': 'Eligible Population', 'reset_on_fiscal_year': False},
+                're_enrollment_eligible_population': {'id': 're_enrollment_eligible', 'name': 'Re-enrollment Eligible', 'reset_on_fiscal_year': False},
+                'applied_population': {'id': 'applied', 'name': 'Applied Population', 'reset_on_fiscal_year': False},
+                'enrolled_inactive_population': {'id': 'enrolled_inactive', 'name': 'Enrolled Inactive', 'reset_on_fiscal_year': True},
+                'active_claimant_population': {'id': 'active_claimant', 'name': 'Active Claimant', 'reset_on_fiscal_year': True}
             },
             'flows': {
                 'new_applications': {'id': 'new_applications', 'source': 'eligible', 'target': 'applied'},
@@ -139,30 +139,64 @@ class TestSimulation(unittest.TestCase):
         # Basic checks on results
         self.assertIsNotNone(results)
         self.assertIn('simulation_params', results)
-        self.assertIn('state_metrics', results)
-        self.assertIn('flow_metrics', results)
+        self.assertIn('metrics', results)
         
-        # Check some metrics were recorded
-        self.assertIn('eligible', results['state_metrics'])
-        self.assertIn('new_applications', results['flow_metrics'])
+        # Verify metrics contains a list of records
+        self.assertIsInstance(results['metrics'], list)
+        self.assertTrue(len(results['metrics']) > 0)
+        
+        # Check that at least one metric has been created
+        self.assertIsInstance(results['metrics'][0], dict)
+        self.assertIn('type', results['metrics'][0])
+        self.assertIn('id', results['metrics'][0])
+        self.assertIn('value', results['metrics'][0])
         
         # Check that time has advanced to end date
         self.assertTrue(self.simulation.time_manager.current_date > self.end_date)
         
-        # Check that at least some population has flowed through states
+        # Find state metrics for final period
         final_period = "2025-06"  # June 2025
+        
+        # Check eligible population decreases
         initial_eligible = 1000
-        final_eligible = results['state_metrics']['eligible'][final_period]['total']
+        eligible_metrics = [m for m in results['metrics'] 
+                            if m['type'] == 'state' and 
+                               m['id'] == 'eligible' and 
+                               m['period'] == final_period and
+                               m['region'] == 'ALL' and
+                               m['cohort'] == 'ALL']
+        
+        self.assertTrue(len(eligible_metrics) > 0, "No eligible metrics found for final period")
+        final_eligible = eligible_metrics[0]['value']
         
         # Should be less than initial as some have applied and enrolled
         self.assertLess(final_eligible, initial_eligible)
         
         # Check that some have enrolled
-        enrolled_inactive = results['state_metrics']['enrolled_inactive'][final_period]['total']
-        active_claimant = results['state_metrics']['active_claimant'][final_period]['total']
+        enrolled_metrics = [m for m in results['metrics'] 
+                            if m['type'] == 'state' and 
+                               m['id'] == 'enrolled_inactive' and 
+                               m['period'] == final_period and
+                               m['region'] == 'ALL']
+        
+        active_metrics = [m for m in results['metrics'] 
+                          if m['type'] == 'state' and 
+                             m['id'] == 'active_claimant' and 
+                             m['period'] == final_period and
+                             m['region'] == 'ALL']
+        
+        self.assertTrue(len(enrolled_metrics) > 0, "No enrolled_inactive metrics found")
+        self.assertTrue(len(active_metrics) > 0, "No active_claimant metrics found")
+        
+        enrolled_inactive = enrolled_metrics[0]['value'] if enrolled_metrics else 0
+        active_claimant = active_metrics[0]['value'] if active_metrics else 0
         total_enrolled = enrolled_inactive + active_claimant
         
         self.assertGreater(total_enrolled, 0)
+        
+        # Check that derived metrics were calculated
+        derived_metrics = [m for m in results['metrics'] if m['type'] == 'derived']
+        self.assertTrue(len(derived_metrics) > 0, "No derived metrics found")
     
     def test_get_simulation_results(self):
         """Test getting simulation results."""
@@ -177,6 +211,61 @@ class TestSimulation(unittest.TestCase):
         self.assertEqual(results['simulation_params']['scenario'], 'test_simulation')
         self.assertEqual(results['simulation_params']['start_date'], self.start_date.isoformat())
         self.assertEqual(results['simulation_params']['end_date'], self.end_date.isoformat())
+        
+        # Check metrics structure
+        self.assertIn('metrics', results)
+        self.assertIsInstance(results['metrics'], list)
+        
+        # Check that metrics have the correct fields
+        if results['metrics']:
+            metric = results['metrics'][0]
+            self.assertIn('type', metric)
+            self.assertIn('id', metric)
+            self.assertIn('period', metric)
+            self.assertIn('region', metric)
+            self.assertIn('cohort', metric)
+            self.assertIn('age_bracket', metric)
+            self.assertIn('segment', metric)
+            self.assertIn('value', metric)
+    
+    def test_metric_filtering(self):
+        """Test filtering metrics by various dimensions."""
+        self.simulation.load_configuration("test_simulation")
+        self.simulation.initialize_simulation()
+        self.simulation.run_simulation()
+        
+        # Get statistics tracker
+        stats = self.simulation.statistics_tracker
+        
+        # Test filtering by type
+        state_metrics = stats.get_metrics_by_type('state')
+        self.assertTrue(all(m['type'] == 'state' for m in state_metrics))
+        
+        # Test filtering by ID
+        eligible_metrics = stats.get_metrics_by_id('eligible')
+        self.assertTrue(all(m['id'] == 'eligible' for m in eligible_metrics))
+        
+        # Test filtering by period
+        if eligible_metrics:
+            period = eligible_metrics[0]['period']
+            period_metrics = stats.get_metrics_by_period(period)
+            self.assertTrue(all(m['period'] == period for m in period_metrics))
+        
+        # Test filtering by dimensions
+        region_metrics = stats.get_metrics_by_dimensions(region='test_region')
+        self.assertTrue(all(m['region'] == 'test_region' for m in region_metrics))
+        
+        cohort_metrics = stats.get_metrics_by_dimensions(cohort='test_cohort')
+        self.assertTrue(all(m['cohort'] == 'test_cohort' for m in cohort_metrics))
+        
+        # Test multiple dimension filtering
+        filtered_metrics = stats.get_metrics_by_dimensions(
+            region='test_region', 
+            cohort='test_cohort'
+        )
+        self.assertTrue(all(m['region'] == 'test_region' and 
+                           m['cohort'] == 'test_cohort' 
+                           for m in filtered_metrics))
 
 
 if __name__ == '__main__':

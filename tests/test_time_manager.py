@@ -5,7 +5,7 @@ Tests for TimeManager class.
 import unittest
 import datetime
 from dateutil.relativedelta import relativedelta
-from ohb_simulation.core.time_manager import TimeManager, TimeInterval
+from core.time_manager import TimeManager, TimeInterval
 
 
 class TestTimeManager(unittest.TestCase):
@@ -113,7 +113,7 @@ class TestTimeManager(unittest.TestCase):
         self.assertEqual(tm.get_months_since("2025-04-15"), 3)
     
     def test_get_current_fiscal_year(self):
-        """Test getting current fiscal year identifier."""
+        """Get the current fiscal year identifier using start year convention."""
         # Start of fiscal year
         tm = TimeManager(datetime.date(2025, 4, 1))
         self.assertEqual(tm.get_current_fiscal_year(), "FY2025")

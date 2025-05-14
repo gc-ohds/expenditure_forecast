@@ -124,23 +124,39 @@ def main():
         
         # Initialize simulation components
         simulation.initialize_simulation()
+
         
         # Run simulation
         results = simulation.run_simulation()
-        
-        # Generate reports
-        reports = simulation.generate_reports()
-        
-        # Save results to output file
-        output_file = os.path.join(
+                
+        # Generate reports - This is a placeholder for report generation in the future
+        # reports = simulation.generate_reports()
+
+        # Generate output filename base
+        output_base = os.path.join(
             args.output_dir, 
-            f"simulation_results_{args.scenario}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            f"simulation_results_{args.scenario}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
         )
         
-        with open(output_file, 'w') as f:
-            json.dump(results, f, indent=2, default=str)
+        # Determine output formats
+        formats = []
+        if args.output_format == 'json' or args.output_format == 'both':
+            formats.append('json')
+        if args.output_format == 'csv' or args.output_format == 'both':
+            formats.append('csv')
         
-        logger.info(f"Simulation results saved to {output_file}")
+        # Export results in the requested format(s)
+        output_files = simulation.export_results(output_base, formats)
+        
+        # Log output files
+        logger.info(f"Simulation results exported in the following formats:")
+        for fmt, paths in output_files.items():
+            if isinstance(paths, dict):
+                logger.info(f"  {fmt.upper()} files:")
+                for metric_type, path in paths.items():
+                    logger.info(f"    - {metric_type}: {path}")
+            else:
+                logger.info(f"  {fmt.upper()}: {paths}")
         
         # Print summary results
         print("\nSimulation Summary:")

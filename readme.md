@@ -17,6 +17,7 @@ This implementation represents Phase 1 of the development, focusing on creating 
 - **Fiscal Year Tracking**: Handle fiscal year transitions and state resets
 - **Statistical Tracking**: Capture detailed metrics throughout the simulation
 - **Scenario-based Configuration**: Run different scenarios with configuration variations
+- **Flexible Output Formats**: Generate results in JSON or CSV format for easy analysis
 
 ## Installation
 
@@ -104,13 +105,78 @@ python main.py --scenario simple_scenario --start-date 2025-04-01 --end-date 202
 - `--time-interval`: Time interval for simulation progression - MONTHLY, QUARTERLY, or ANNUAL (default: "MONTHLY")
 - `--config-dir`: Directory containing configuration files (default: "config")
 - `--output-dir`: Directory for output files (default: "output")
+- `--output-format`: Format for output files - json, csv, or both (default: "json")
 - `--list-scenarios`: List available scenarios and exit
 - `--verbose`, `-v`: Enable verbose logging
 
 ### Example
 
 ```
-python main.py --scenario simple_scenario --start-date 2025-04-01 --end-date 2026-03-31 --verbose
+python main.py --scenario simple_scenario --start-date 2025-04-01 --end-date 2026-03-31 --output-format csv --verbose
+```
+
+### Output Formats
+
+The simulation can output results in two formats:
+
+#### JSON Format
+
+The default output format is JSON, which provides a structured representation of all simulation metrics:
+
+```
+python main.py --scenario simple_scenario --output-format json
+```
+
+#### CSV Format
+
+For easier data analysis, the simulation can output results as CSV files:
+
+```
+python main.py --scenario simple_scenario --output-format csv
+```
+
+This generates multiple CSV files in the output directory:
+- `[base_filename]_state_metrics.csv`: Metrics for population states
+- `[base_filename]_flow_metrics.csv`: Metrics for population flows
+- `[base_filename]_financial_metrics.csv`: Financial metrics
+- `[base_filename]_derived_metrics.csv`: Derived metrics (e.g., enrollment rates)
+- `[base_filename]_simulation_params.csv`: Simulation parameters
+
+#### Both Formats
+
+You can also generate both JSON and CSV formats simultaneously:
+
+```
+python main.py --scenario simple_scenario --output-format both
+```
+
+### Data Analysis
+
+The CSV output files are designed for easy import into data analysis tools:
+
+- Each row represents a single metric value with all its dimensions (type, id, period, region, cohort, age_bracket, segment)
+- Files are organized by metric type for convenient analysis
+- The normalized structure is compatible with spreadsheet applications and tools like pandas
+
+Example of analyzing with pandas:
+
+```python
+import pandas as pd
+
+# Load state metrics
+state_df = pd.read_csv('output/simulation_results_simple_scenario_20250514_state_metrics.csv')
+
+# Create a pivot table of state populations over time
+pivot_table = pd.pivot_table(
+    state_df,
+    values='value',
+    index='period',
+    columns=['id', 'region'],
+    aggfunc='sum'
+)
+
+# Filter for a specific state
+eligible_df = state_df[state_df['id'] == 'eligible']
 ```
 
 ### Configuration
@@ -156,34 +222,51 @@ python -m unittest discover -s ohb_simulation/tests
 
 ## Development Roadmap
 
-This implementation represents Phase 1 (Core Framework & Minimal Viable Simulation) of the "Hybrid Implementation with Vertical Slices" approach. Future phases will include:
+This implementation represents Phase 1 (Core Framework & Minimal Viable Simulation)
 
-### Phase 2: Enrollment Process Slice (3-4 weeks)
+### Phase 1: Core Framework & Minimal Viable Simulation (4 weeks)
+1. **Core Infrastructure**:
+   - `ConfigurationManager` (basic version for loading simple YAML configs)
+   - `TimeManager` (complete implementation)
+   - Simple test configuration files
+
+2. **Minimal Population Tracking**:
+   - `ProcessState` (complete implementation)
+   - `PopulationSegment` (basic implementation with key methods)
+   - `Region` (minimal implementation)
+   
+3. **Basic Process Framework**:
+   - `ProcessStep` (base class with core functionality)
+   - `ProcessResult` (complete implementation)
+   - Simple `PopulationFlow` implementation
+   
+4. **Core Simulation Framework**:
+   - `Simulation` (basic skeleton with time progression)
+   - Simple CLI interface in `main.py`
+   - Basic `StatisticsTracker` for essential metrics
+   
+5. **Testing Framework**:
+   - Unit tests for core components
+   - Simple end-to-end test with mock data
+
+### Phase 2: Enrollment Process Slice (3 weeks)
 - Enhanced application generation and processing
 - Rollout schedule functionality
 - Enhanced enrollment metrics
 
-### Phase 3: Claims & Utilization Process Slice (4-5 weeks)
+### Phase 3: Claims & Utilization Process Slice (3 weeks)
 - Benefit structure implementation
 - Claim generation and processing
 - Financial calculations
 
-### Phase 4: Complete Integration & Advanced Features (4-6 weeks)
+### Phase 4: Complete Integration & Advanced Features (3 weeks)
 - Integration of all components
 - Advanced statistical distributions
 - Duration-based claiming patterns
 - Comprehensive reporting
 
-### Phase 5: Refinement & Documentation (2-3 weeks)
+### Phase 5: Refinement & Documentation (2 weeks)
 - Performance optimization
 - Comprehensive documentation
 - Enhanced error handling
 - Configuration validation tools
-
-## License
-
-[License information]
-
-## Contact
-
-[Contact information]
