@@ -1,6 +1,6 @@
 # OHB Simulation Model
 
-A simulation model for Ontario Health Benefits enrollment and expenditure forecasting.
+A simulation model for Oral Health Benefits enrollment and expenditure forecasting.
 
 ## Overview
 
