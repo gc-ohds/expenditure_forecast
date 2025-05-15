@@ -30,8 +30,8 @@ This implementation represents Phase 1 of the development, focusing on creating 
 
 1. Clone the repository:
    ```
-   git clone https://github.com/your-organization/ohb-simulation.git
-   cd ohb-simulation
+   git clone https://github.com/gc-ohds/expenditure_forecast.git
+   cd expenditure_forecast
    ```
 
 2. Install required dependencies:
