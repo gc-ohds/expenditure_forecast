@@ -11,6 +11,9 @@ from core.time_manager import TimeManager
 from core.config_manager import ConfigurationManager
 from population.region import Region
 from stats.statistics_tracker import StatisticsTracker
+from util.rollout import RolloutSchedule
+from process.application import ApplicationGenerator, ApplicationProcessor
+
 
 logger = logging.getLogger(__name__)
 
@@ -60,22 +63,24 @@ class Simulation:
         Returns:
             bool: True if initialization was successful, False otherwise.
         """
-        # Initialize time manager
-        sim_params = self.config_manager.get_simulation_parameters()
-        fiscal_year_start_month = sim_params.get('fiscal_year_start_month', 4)
-        fiscal_year_start_day = sim_params.get('fiscal_year_start_day', 1)
+        # Existing code...
         
-        self.time_manager = TimeManager(
-            start_date=self.start_date,
-            time_interval=self.time_interval,
-            fiscal_year_start_month=fiscal_year_start_month,
-            fiscal_year_start_day=fiscal_year_start_day
+        # Initialize rollout schedule
+        self.rollout_schedule = self.config_manager.get_rollout_schedule_object()
+        
+        # Initialize application process components
+        self.application_generator = ApplicationGenerator(
+            source_state="eligible",
+            target_state="applied"
         )
         
-        # Initialize regions and population segments
-        self._initialize_regions()
+        self.application_processor = ApplicationProcessor(
+            source_state="applied",
+            target_state="enrolled_inactive"
+        )
         
-        logger.info("Simulation initialization complete")
+        logger.info("Application process components initialized")
+        
         return True
     
     def _initialize_regions(self):
@@ -185,12 +190,28 @@ class Simulation:
         """
         all_results = []
         
-        # Process population flows for all regions
+        # Application generation for all regions
         for region in self.regions:
+            # Generate applications using ApplicationGenerator
+            app_gen_results = self.application_generator.execute(
+                region.population_segments, 
+                self.time_manager, 
+                self.config_manager
+            )
+            all_results.extend(app_gen_results)
+            
+            # Process applications using ApplicationProcessor
+            app_proc_results = self.application_processor.execute(
+                region.population_segments, 
+                self.time_manager, 
+                self.config_manager
+            )
+            all_results.extend(app_proc_results)
+            
+            # Existing population flow processing
             flow_results = region.process_population_flows(
                 self.time_manager, self.config_manager
             )
-            
             all_results.extend(flow_results)
         
         # Update state metrics after all flows
@@ -215,22 +236,6 @@ class Simulation:
                     amount=result.financial_impact, 
                     segment_id=result.segment_id
                 )
-                
-                if hasattr(result, 'program_payment') and result.program_payment > 0:
-                    self.statistics_tracker.update_financial_metric(
-                        metric_id='program_expenditure',
-                        period=period, 
-                        amount=result.program_payment, 
-                        segment_id=result.segment_id
-                    )
-                
-                if hasattr(result, 'patient_payment') and result.patient_payment > 0:
-                    self.statistics_tracker.update_financial_metric(
-                        metric_id='patient_expenditure',
-                        period=period, 
-                        amount=result.patient_payment, 
-                        segment_id=result.segment_id
-                    )
         
         return {'period': period, 'results': all_results}
     

@@ -58,6 +58,14 @@ def parse_arguments():
     parser.add_argument('--verbose', '-v', action='store_true',
                        help='Enable verbose logging')
     
+    # Add rollout schedule option
+    parser.add_argument('--rollout-schedule', type=str, default='default',
+                      help='Name of the rollout schedule to use')
+    
+    # Add option to output enrollment metrics
+    parser.add_argument('--enrollment-report', action='store_true',
+                      help='Generate a detailed enrollment report')
+    
     return parser.parse_args()
 
 
@@ -125,7 +133,6 @@ def main():
         # Initialize simulation components
         simulation.initialize_simulation()
 
-        
         # Run simulation
         results = simulation.run_simulation()
                 

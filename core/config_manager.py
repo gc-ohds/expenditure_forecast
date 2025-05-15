@@ -311,3 +311,27 @@ class ConfigurationManager:
                 scenarios.append(filename[:-5])  # Remove .yaml extension
         
         return scenarios
+    
+    def get_rollout_schedule(self):
+        """
+        Get rollout schedule configuration.
+        
+        Returns:
+            list: List of rollout phase configurations.
+        """
+        merged_config = self.get_merged_config()
+        return merged_config.get('rollout_schedule', [])
+
+    def get_rollout_schedule_object(self):
+        """
+        Get or create a RolloutSchedule object from configuration.
+        
+        Returns:
+            RolloutSchedule: Configured rollout schedule object.
+        """
+        if not hasattr(self, '_rollout_schedule') or self._rollout_schedule is None:
+            from util.rollout import RolloutSchedule
+            self._rollout_schedule = RolloutSchedule()
+            self._rollout_schedule.load_from_config(self)
+        
+        return self._rollout_schedule

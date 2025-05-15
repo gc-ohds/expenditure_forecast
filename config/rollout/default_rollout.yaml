@@ -1,0 +1,82 @@
+# Default Rollout Schedule for OHB Program
+rollout_schedule:
+  - phase_id: "phase1"
+    cohort_id: "seniors"
+    age_min: 65
+    age_max: 120
+    start_date: "2025-04-01"
+    description: "Seniors 65+ initial rollout"
+
+  - phase_id: "phase2"
+    cohort_id: "pwd"
+    age_min: 18
+    age_max: 64
+    start_date: "2025-05-01"
+    description: "Persons with disabilities aged 18-64"
+
+  - phase_id: "phase3"
+    cohort_id: "children"
+    age_min: 0
+    age_max: 17
+    start_date: "2025-06-01"
+    description: "Children under 18"
+
+  - phase_id: "phase4"
+    cohort_id: "adults"
+    age_min: 18
+    age_max: 64
+    start_date: "2025-07-01"
+    description: "Adults aged 18-64 (general population)"
+
+# Application rates by cohort
+application_rates:
+  seniors:
+    base_rate: 0.08
+    seasonal_factors:
+      1: 1.2  # January
+      4: 1.1  # April
+      7: 0.8  # July
+      10: 1.1  # October
+  
+  pwd:
+    base_rate: 0.10
+    seasonal_factors:
+      1: 1.15
+      7: 0.85
+  
+  children:
+    base_rate: 0.07
+    seasonal_factors:
+      9: 1.3  # September (back to school)
+      12: 0.7  # December (holidays)
+  
+  adults:
+    base_rate: 0.05
+    seasonal_factors:
+      1: 1.2  # January (new year)
+      7: 0.85  # July (summer)
+
+# Re-enrollment application rates by cohort
+re_enrollment_rates:
+  seniors:
+    base_rate: 0.15
+  pwd:
+    base_rate: 0.18
+  children:
+    base_rate: 0.12
+  adults:
+    base_rate: 0.10
+
+# Approval rates by application type and cohort
+approval_rates:
+  new_enrollments:
+    seniors: 0.80
+    pwd: 0.85
+    children: 0.90
+    adults: 0.75
+  
+  new_re_enrollment:
+    seniors: 0.90
+    pwd: 0.92
+    children: 0.95
+    adults: 0.85

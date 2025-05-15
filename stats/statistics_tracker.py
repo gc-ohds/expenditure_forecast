@@ -575,6 +575,10 @@ class StatisticsTracker:
         state_metrics = self.calculate_derived_state_metrics(period)
         derived_metrics.extend(state_metrics)
         
+        # Calculate enrollment-derived metrics
+        enrollment_metrics = self.calculate_enrollment_metrics(period)
+        derived_metrics.extend(enrollment_metrics)
+        
         # Calculate financial-derived metrics
         financial_metrics = self.calculate_derived_financial_metrics(period)
         derived_metrics.extend(financial_metrics)
@@ -704,3 +708,73 @@ class StatisticsTracker:
         return {
             "metrics": self.metrics
         }
+    
+    def calculate_enrollment_metrics(self, period):
+        """
+        Calculate enrollment-specific metrics.
+        
+        Args:
+            period (str): Time period identifier.
+            
+        Returns:
+            list: List of enrollment metric records.
+        """
+        enrollment_metrics = []
+        
+        # Get all dimensions
+        dimensions = self._get_all_dimensions()
+        
+        for dim in dimensions:
+            region_id, cohort_type, age_bracket, segment_id = dim
+            
+            # Calculate application rate (new applications / eligible population)
+            eligible_key = f"state:eligible:{period}:{region_id}:{cohort_type}:{age_bracket}:{segment_id}"
+            applications_key = f"flow:new_applications:{period}:{region_id}:{cohort_type}:{age_bracket}:{segment_id}"
+            
+            eligible = self._metric_cache.get(eligible_key, 0)
+            applications = self._metric_cache.get(applications_key, 0)
+            
+            if eligible > 0 and applications > 0:
+                application_rate = applications / eligible
+                
+                # Add application_rate metric
+                enrollment_metrics.append({
+                    "type": "derived",
+                    "id": "application_rate",
+                    "period": period,
+                    "region": region_id,
+                    "cohort": cohort_type,
+                    "age_bracket": age_bracket,
+                    "segment": segment_id,
+                    "value": application_rate
+                })
+                
+                # Update cache
+                self._metric_cache[f"derived:application_rate:{period}:{region_id}:{cohort_type}:{age_bracket}:{segment_id}"] = application_rate
+            
+            # Calculate approval rate (new enrollments / new applications)
+            enrollments_key = f"flow:new_enrollments:{period}:{region_id}:{cohort_type}:{age_bracket}:{segment_id}"
+            enrollments = self._metric_cache.get(enrollments_key, 0)
+            
+            if applications > 0 and enrollments > 0:
+                approval_rate = enrollments / applications
+                
+                # Add approval_rate metric
+                enrollment_metrics.append({
+                    "type": "derived",
+                    "id": "approval_rate",
+                    "period": period,
+                    "region": region_id,
+                    "cohort": cohort_type,
+                    "age_bracket": age_bracket,
+                    "segment": segment_id,
+                    "value": approval_rate
+                })
+                
+                # Update cache
+                self._metric_cache[f"derived:approval_rate:{period}:{region_id}:{cohort_type}:{age_bracket}:{segment_id}"] = approval_rate
+        
+        # Add metrics to the overall list
+        self.metrics.extend(enrollment_metrics)
+        
+        return enrollment_metrics
