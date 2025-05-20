@@ -52,6 +52,10 @@ def parse_arguments():
     parser.add_argument('--output-dir', type=str, default='output',
                        help='Directory for output files')
     
+    parser.add_argument('--output-format', type=str, default='json',
+                       choices=['json', 'csv', 'both'],
+                       help='Format for output files (json, csv, or both)')
+    
     parser.add_argument('--list-scenarios', action='store_true',
                        help='List available scenarios and exit')
     
