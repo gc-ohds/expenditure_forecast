@@ -778,3 +778,72 @@ class StatisticsTracker:
         self.metrics.extend(enrollment_metrics)
         
         return enrollment_metrics
+
+    def export_to_csv(self, base_path):
+        """
+        Export metrics to CSV files, grouped by metric type.
+        
+        Args:
+            base_path (str): Base path for CSV files (without extension).
+            
+        Returns:
+            dict: Dictionary mapping metric types to file paths.
+        """
+        # Group metrics by type
+        metrics_by_type = {}
+        for metric in self.metrics:
+            metric_type = metric['type']
+            if metric_type not in metrics_by_type:
+                metrics_by_type[metric_type] = []
+            metrics_by_type[metric_type].append(metric)
+        
+        # Export each type to a separate CSV file
+        file_paths = {}
+        for metric_type, metrics in metrics_by_type.items():
+            if not metrics:
+                continue
+                
+            file_path = f"{base_path}_{metric_type}_metrics.csv"
+            
+            # Create CSV content
+            header = metrics[0].keys()
+            csv_rows = [','.join(str(row[col]) for col in header) for row in metrics]
+            csv_content = ','.join(header) + '\n' + '\n'.join(csv_rows)
+            
+            # Write to file
+            with open(file_path, 'w') as f:
+                f.write(csv_content)
+            
+            file_paths[metric_type] = file_path
+        
+        return file_paths
+    
+    def export_to_pandas_compatible_dict(self):
+        """
+        Export metrics in a format directly compatible with pandas DataFrame.
+        
+        Returns:
+            dict: Dictionary with metric data organized by columns.
+        """
+        # Skip this method if pandas is not available
+        try:
+            import pandas as pd
+        except ImportError:
+            return {"error": "pandas not available"}
+        
+        # Create a dictionary with column names as keys and lists of values
+        column_data = {}
+        
+        if not self.metrics:
+            return column_data
+            
+        # Initialize columns
+        for column in self.metrics[0].keys():
+            column_data[column] = []
+            
+        # Fill in data
+        for metric in self.metrics:
+            for column in column_data:
+                column_data[column].append(metric.get(column, None))
+                
+        return column_data
