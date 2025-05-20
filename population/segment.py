@@ -237,20 +237,33 @@ class PopulationSegment:
         
         return reset_populations
     
-    def get_currently_eligible_population(self, current_date):
+    def get_currently_eligible_population(self, current_date, rollout_schedule=None):
         """
         Get population eligible at current date.
         
         Args:
             current_date (date): Current date in the simulation.
+            rollout_schedule (RolloutSchedule, optional): Rollout schedule for eligibility check.
             
         Returns:
             int: Eligible population count.
         """
+        # Check age bracket eligibility
         if not self.age_bracket.is_eligible(current_date):
             return 0
         
-        # In Phase 1, we'll just use the sum of eligible and re-enrollment eligible
+        # Check rollout schedule eligibility if provided
+        if rollout_schedule is not None:
+            # Get age from segment's age bracket (midpoint for simplicity)
+            age = (self.age_bracket.age_min + self.age_bracket.age_max) // 2
+            
+            # Check if cohort and age are eligible at current date
+            if not rollout_schedule.is_cohort_age_eligible(
+                self.cohort_type, age, current_date
+            ):
+                return 0
+        
+        # Return eligible population count
         eligible_count = self.get_state_population('eligible')
         re_enroll_count = self.get_state_population('re_enrollment_eligible')
         
