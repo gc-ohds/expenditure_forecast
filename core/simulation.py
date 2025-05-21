@@ -57,13 +57,8 @@ class Simulation:
                    f"with {time_interval} intervals")
     
     def initialize_simulation(self):
-        """
-        Set up all simulation components.
-        
-        Returns:
-            bool: True if initialization was successful, False otherwise.
-        """
-        # Initialize time manager (ensure this code is present)
+        """Set up all simulation components."""
+        # Initialize time manager
         sim_params = self.config_manager.get_simulation_parameters()
         fiscal_year_start_month = sim_params.get('fiscal_year_start_month', 4)
         fiscal_year_start_day = sim_params.get('fiscal_year_start_day', 1)
@@ -78,8 +73,83 @@ class Simulation:
         # Initialize regions and population segments
         self._initialize_regions()
         
-        # Initialize rollout schedule
-        self.rollout_schedule = self.config_manager.get_rollout_schedule_object()
+        # Create an explicit rollout schedule for testing
+        from datetime import date
+        from util.rollout import RolloutSchedule, RolloutPhase
+        
+        self.rollout_schedule = RolloutSchedule()
+        
+        # Add specific phases for each cohort
+        phase1 = RolloutPhase(
+            phase_id="phase1",
+            cohort_id="seniors",
+            age_min=65,
+            age_max=120,
+            start_date=date(2025, 4, 1),
+            description="Seniors 65+ initial rollout"
+        )
+        
+        phase2 = RolloutPhase(
+            phase_id="phase2",
+            cohort_id="pwd",
+            age_min=18,
+            age_max=64,
+            start_date=date(2025, 5, 1),
+            description="Persons with disabilities aged 18-64"
+        )
+        
+        phase3 = RolloutPhase(
+            phase_id="phase3",
+            cohort_id="children",
+            age_min=0,
+            age_max=17,
+            start_date=date(2025, 6, 1),
+            description="Children under 18"
+        )
+        
+        phase4 = RolloutPhase(
+            phase_id="phase4",
+            cohort_id="adults",
+            age_min=18,
+            age_max=64,
+            start_date=date(2025, 7, 1),
+            description="Adults aged 18-64 (general population)"
+        )
+        
+        self.rollout_schedule.add_phase(phase1)
+        self.rollout_schedule.add_phase(phase2)
+        self.rollout_schedule.add_phase(phase3)
+        self.rollout_schedule.add_phase(phase4)
+        
+        logger.info(f"Created explicit rollout schedule with {len(self.rollout_schedule.phases)} phases")
+        
+        # Store original population sizes for each segment
+        self.segment_original_populations = {}
+        
+        # Apply rollout schedule to determine initial eligible populations
+        if self.rollout_schedule:
+            current_date = self.time_manager.current_date
+            eligible_cohorts = self.rollout_schedule.get_eligible_cohorts(current_date)
+            logger.info(f"Eligible cohorts at start date: {eligible_cohorts}")
+            
+            # Process each region
+            for region in self.regions:
+                for segment in region.population_segments:
+                    # Store original population
+                    self.segment_original_populations[segment.segment_id] = segment.states['eligible'].get_population()
+                    
+                    # Check if segment is eligible based on rollout schedule
+                    age = (segment.age_bracket.age_min + segment.age_bracket.age_max) // 2
+                    is_eligible = self.rollout_schedule.is_cohort_age_eligible(
+                        segment.cohort_type, age, current_date
+                    )
+                    
+                    if not is_eligible:
+                        # Reset eligible population to 0
+                        segment.states['eligible'].reset_population()
+                        logger.info(f"Segment {segment.segment_id} not eligible at start date")
+                    else:
+                        logger.info(f"Segment {segment.segment_id} eligible at start date")
         
         # Initialize application process components
         self.application_generator = ApplicationGenerator(
@@ -92,8 +162,10 @@ class Simulation:
             target_state="enrolled_inactive"
         )
         
-        logger.info("Application process components initialized")
+        # Update initial state metrics
+        self.statistics_tracker.update_state_metrics(self.regions, self.time_manager)
         
+        logger.info("Simulation initialization complete")
         return True
     
     def _initialize_regions(self):
@@ -202,6 +274,34 @@ class Simulation:
             dict: Dictionary of process results.
         """
         all_results = []
+        period = self.time_manager.get_current_period()
+        logger.info(f"Processing period: {period}")
+        
+        # Update eligibility based on rollout schedule
+        if self.rollout_schedule:
+            current_date = self.time_manager.current_date
+            eligible_cohorts = self.rollout_schedule.get_eligible_cohorts(current_date)
+            logger.info(f"Current date: {current_date}, Eligible cohorts: {eligible_cohorts}")
+            
+            # Process each region
+            for region in self.regions:
+                for segment in region.population_segments:
+                    # Check if segment is already eligible
+                    current_eligible = segment.states['eligible'].get_population()
+                    
+                    # Only check segments that aren't already eligible
+                    if current_eligible == 0:
+                        # Check if segment is newly eligible based on rollout schedule
+                        age = (segment.age_bracket.age_min + segment.age_bracket.age_max) // 2
+                        is_eligible = self.rollout_schedule.is_cohort_age_eligible(
+                            segment.cohort_type, age, current_date
+                        )
+                        
+                        # If segment just became eligible, restore its population
+                        if is_eligible:
+                            original_pop = self.segment_original_populations.get(segment.segment_id, segment.population_size)
+                            segment.states['eligible'].set_population(original_pop)
+                            logger.info(f"Segment {segment.segment_id} became eligible at {current_date}, population {original_pop}")
         
         # Application generation for all regions
         for region in self.regions:
@@ -231,7 +331,6 @@ class Simulation:
         self.statistics_tracker.update_state_metrics(self.regions, self.time_manager)
         
         # Update flow metrics from results
-        period = self.time_manager.get_current_period()
         for result in all_results:
             if hasattr(result, 'flow_id') and result.flow_id:
                 self.statistics_tracker.update_flow_metric(

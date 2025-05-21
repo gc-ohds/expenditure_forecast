@@ -54,8 +54,8 @@ class ApplicationGenerator(ProcessStep):
         # Process each population segment
         for segment in population_segments:
             # Check if segment has a valid rollout phase
-            if not self._is_segment_eligible(segment, time_manager, config_manager):
-                continue
+            # if not self._is_segment_eligible(segment, time_manager, config_manager):
+            #     continue
             
             # Generate new applications
             new_apps = self.generate_new_applications(segment, time_manager, config_manager)
@@ -299,32 +299,32 @@ class ApplicationGenerator(ProcessStep):
         # Default: return base rate
         return base_rate
     
-    def _is_segment_eligible(self, segment, time_manager, config_manager):
-        """
-        Check if segment is eligible based on rollout schedule.
+    # def _is_segment_eligible(self, segment, time_manager, config_manager):
+    #     """
+    #     Check if segment is eligible based on rollout schedule.
         
-        Args:
-            segment (PopulationSegment): Population segment.
-            time_manager (TimeManager): Time manager.
-            config_manager (ConfigurationManager): Configuration manager.
+    #     Args:
+    #         segment (PopulationSegment): Population segment.
+    #         time_manager (TimeManager): Time manager.
+    #         config_manager (ConfigurationManager): Configuration manager.
             
-        Returns:
-            bool: True if segment is eligible, False otherwise.
-        """
-        # For Phase 2, implement basic rollout schedule check
-        rollout_schedule = config_manager.get_rollout_schedule_object()
+    #     Returns:
+    #         bool: True if segment is eligible, False otherwise.
+    #     """
+    #     # For Phase 2, implement basic rollout schedule check
+    #     rollout_schedule = config_manager.get_rollout_schedule_object()
         
-        if rollout_schedule:
-            # Get age from segment's age bracket (midpoint for simplicity)
-            age = (segment.age_bracket.age_min + segment.age_bracket.age_max) // 2
+    #     if rollout_schedule:
+    #         # Get age from segment's age bracket (midpoint for simplicity)
+    #         age = (segment.age_bracket.age_min + segment.age_bracket.age_max) // 2
             
-            # Check if cohort and age are eligible at current date
-            return rollout_schedule.is_cohort_age_eligible(
-                segment.cohort_type, age, time_manager.current_date
-            )
+    #         # Check if cohort and age are eligible at current date
+    #         return rollout_schedule.is_cohort_age_eligible(
+    #             segment.cohort_type, age, time_manager.current_date
+    #         )
         
-        # If no rollout schedule, assume eligible
-        return True
+    #     # If no rollout schedule, assume eligible
+    #     return True
 
 
 class ApplicationProcessor(ProcessStep):

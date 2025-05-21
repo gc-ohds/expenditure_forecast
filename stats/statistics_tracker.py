@@ -41,6 +41,15 @@ class StatisticsTracker:
             list: Updated state metrics records.
         """
         period = time_manager.get_current_period()
+        logger.info(f"Updating state metrics for period {period}")
+        logger.info(f"Number of regions: {len(regions)}")
+        for region in regions:
+            logger.info(f"Region {region.region_id}: {len(region.population_segments)} segments")
+            for segment in region.population_segments:
+                for state_id, state in segment.states.items():
+                    pop = state.get_population()
+                    logger.info(f"  Segment {segment.segment_id}, State {state_id}: {pop}")
+        
         new_metrics = []
         
         # Reset existing state metrics for this period to avoid duplication

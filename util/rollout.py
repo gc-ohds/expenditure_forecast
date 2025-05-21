@@ -45,35 +45,19 @@ class RolloutPhase:
         self.description = description
     
     def is_active(self, current_date):
-        """
-        Check if phase is active at current date.
-        
-        Args:
-            current_date (date): Current date to check against.
-            
-        Returns:
-            bool: True if the phase is active at the current date.
-        """
-        # Convert string date to datetime.date if needed
-        if isinstance(current_date, str):
-            current_date = datetime.datetime.strptime(current_date, "%Y-%m-%d").date()
-            
-        return current_date >= self.start_date
+        """Check if phase is active at current date."""
+        result = current_date >= self.start_date
+        logger.debug(f"Phase {self.phase_id} active check: date={current_date}, start={self.start_date}, result={result}")
+        return result
     
     def matches_cohort_and_age(self, cohort_id, age):
-        """
-        Check if the phase matches the specified cohort and age.
-        
-        Args:
-            cohort_id (str): Cohort identifier to check.
-            age (int): Age to check.
-            
-        Returns:
-            bool: True if the phase matches the cohort and age.
-        """
-        return (self.cohort_id == cohort_id and 
+        """Check if the phase matches the specified cohort and age."""
+        result = (self.cohort_id == cohort_id and 
                 age >= self.age_min and 
                 age <= self.age_max)
+        logger.debug(f"Phase {self.phase_id} match check: cohort={cohort_id}=={self.cohort_id}, " 
+                    f"age={age} in {self.age_min}-{self.age_max}, result={result}")
+        return result
     
     def to_dict(self):
         """
