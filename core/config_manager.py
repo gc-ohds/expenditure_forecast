@@ -320,7 +320,26 @@ class ConfigurationManager:
             list: List of rollout phase configurations.
         """
         merged_config = self.get_merged_config()
-        return merged_config.get('rollout_schedule', [])
+        
+        # check if rollout_schedule_config is in the base config, if so, load it
+        # if not, load the default_rollout_schedule from the base config
+        if 'rollout_schedule_config' not in merged_config:
+            return merged_config.get('default_rollout_schedule', [])
+        
+        # If not, check if we have a reference to a rollout schedule file
+        rollout_config_name = merged_config.get('rollout_schedule_config')
+        
+        # Try to load the specified rollout configuration file
+        rollout_path = os.path.join(self.config_directory, "rollout", f"{rollout_config_name}.yaml")
+        
+        try:
+            with open(rollout_path, 'r') as file:
+                rollout_config = yaml.safe_load(file)
+                logger.info(f"Loaded rollout schedule from {rollout_path}")
+                return rollout_config.get('rollout_schedule', [])
+        except FileNotFoundError:
+            logger.warning(f"Rollout schedule file not found at {rollout_path}")
+            return merged_config.get('default_rollout_schedule', [])
 
     def get_rollout_schedule_object(self):
         """

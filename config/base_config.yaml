@@ -78,10 +78,10 @@ flow_rates:
   new_applications_pwd_all: 0.10           # Higher application rate for PWD
   new_applications_children_u18: 0.07      # Higher application rate for children
 
-rollout_schedule_config: "default_rollout"
+rollout_schedule_config_: "default_rollout"
 
-# Rollout schedule
-rollout_schedule:
+# Default rollout schedule, rolls out all cohorts together, do not modify this section
+default_rollout_schedule:
   - phase_id: "default"
     cohort_id: "ALL"
     age_min: 0

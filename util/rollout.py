@@ -104,6 +104,7 @@ class RolloutSchedule:
             bool: True if loading was successful, False otherwise.
         """
         rollout_config = config_manager.get_rollout_schedule()
+        print(f"Rollout schedule config: {rollout_config}")
         
         if not rollout_config:
             logger.warning("No rollout schedule configuration found")
@@ -139,6 +140,9 @@ class RolloutSchedule:
             self.add_phase(phase)
         
         logger.info(f"Loaded {len(self.phases)} rollout phases")
+        for phase in self.phases:
+            logger.info(f"  Phase: {phase}")
+        
         return True
     
     def get_eligible_cohorts(self, current_date):

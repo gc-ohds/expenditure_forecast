@@ -57,7 +57,12 @@ class Simulation:
                    f"with {time_interval} intervals")
     
     def initialize_simulation(self):
-        """Set up all simulation components."""
+        """
+        Set up all simulation components.
+        
+        Returns:
+            bool: True if initialization was successful, False otherwise.
+        """
         # Initialize time manager
         sim_params = self.config_manager.get_simulation_parameters()
         fiscal_year_start_month = sim_params.get('fiscal_year_start_month', 4)
@@ -73,55 +78,15 @@ class Simulation:
         # Initialize regions and population segments
         self._initialize_regions()
         
-        # Create an explicit rollout schedule for testing
-        from datetime import date
-        from util.rollout import RolloutSchedule, RolloutPhase
-        
+        # Load rollout schedule from configuration
+        from util.rollout import RolloutSchedule
         self.rollout_schedule = RolloutSchedule()
+        success = self.rollout_schedule.load_from_config(self.config_manager)
         
-        # Add specific phases for each cohort
-        phase1 = RolloutPhase(
-            phase_id="phase1",
-            cohort_id="seniors",
-            age_min=65,
-            age_max=120,
-            start_date=date(2025, 4, 1),
-            description="Seniors 65+ initial rollout"
-        )
-        
-        phase2 = RolloutPhase(
-            phase_id="phase2",
-            cohort_id="pwd",
-            age_min=18,
-            age_max=64,
-            start_date=date(2025, 5, 1),
-            description="Persons with disabilities aged 18-64"
-        )
-        
-        phase3 = RolloutPhase(
-            phase_id="phase3",
-            cohort_id="children",
-            age_min=0,
-            age_max=17,
-            start_date=date(2025, 6, 1),
-            description="Children under 18"
-        )
-        
-        phase4 = RolloutPhase(
-            phase_id="phase4",
-            cohort_id="adults",
-            age_min=18,
-            age_max=64,
-            start_date=date(2025, 7, 1),
-            description="Adults aged 18-64 (general population)"
-        )
-        
-        self.rollout_schedule.add_phase(phase1)
-        self.rollout_schedule.add_phase(phase2)
-        self.rollout_schedule.add_phase(phase3)
-        self.rollout_schedule.add_phase(phase4)
-        
-        logger.info(f"Created explicit rollout schedule with {len(self.rollout_schedule.phases)} phases")
+        if not success:
+            logger.warning("Failed to load rollout schedule from configuration")
+        else:
+            logger.info(f"Successfully loaded rollout schedule with {len(self.rollout_schedule.phases)} phases")
         
         # Store original population sizes for each segment
         self.segment_original_populations = {}
