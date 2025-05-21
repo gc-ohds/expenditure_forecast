@@ -79,3 +79,12 @@ flow_rates:
   new_applications_children_u18: 0.07      # Higher application rate for children
 
 rollout_schedule_config: "default_rollout"
+
+# Rollout schedule
+rollout_schedule:
+  - phase_id: "default"
+    cohort_id: "ALL"
+    age_min: 0
+    age_max: 120
+    start_date: "2025-04-01"
+    description: "Default rollout (all cohorts eligible)"

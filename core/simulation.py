@@ -63,7 +63,20 @@ class Simulation:
         Returns:
             bool: True if initialization was successful, False otherwise.
         """
-        # Existing code...
+        # Initialize time manager (ensure this code is present)
+        sim_params = self.config_manager.get_simulation_parameters()
+        fiscal_year_start_month = sim_params.get('fiscal_year_start_month', 4)
+        fiscal_year_start_day = sim_params.get('fiscal_year_start_day', 1)
+        
+        self.time_manager = TimeManager(
+            start_date=self.start_date,
+            time_interval=self.time_interval,
+            fiscal_year_start_month=fiscal_year_start_month,
+            fiscal_year_start_day=fiscal_year_start_day
+        )
+        
+        # Initialize regions and population segments
+        self._initialize_regions()
         
         # Initialize rollout schedule
         self.rollout_schedule = self.config_manager.get_rollout_schedule_object()

@@ -123,7 +123,21 @@ class RolloutSchedule:
         
         if not rollout_config:
             logger.warning("No rollout schedule configuration found")
-            return False
+            
+            # Create a default rollout that makes everything eligible
+            # This ensures the simulation can still run without a rollout schedule
+            default_phase = RolloutPhase(
+                phase_id="default",
+                cohort_id="ALL",
+                age_min=0,
+                age_max=120,
+                start_date=config_manager.get_simulation_parameters().get(
+                    'start_date', "2025-04-01"),
+                description="Default rollout (all cohorts eligible)"
+            )
+            self.add_phase(default_phase)
+            logger.info("Created default rollout schedule (all cohorts eligible)")
+            return True
         
         # Clear existing phases
         self.phases = []

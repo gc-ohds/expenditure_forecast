@@ -327,11 +327,18 @@ class ConfigurationManager:
         Get or create a RolloutSchedule object from configuration.
         
         Returns:
-            RolloutSchedule: Configured rollout schedule object.
+            RolloutSchedule: Configured rollout schedule object, or None if unavailable.
         """
+        # Avoid circular imports
+        from util.rollout import RolloutSchedule
+        
         if not hasattr(self, '_rollout_schedule') or self._rollout_schedule is None:
-            from util.rollout import RolloutSchedule
             self._rollout_schedule = RolloutSchedule()
-            self._rollout_schedule.load_from_config(self)
+            success = self._rollout_schedule.load_from_config(self)
+            
+            # If loading fails, set to None to avoid repeated failures
+            if not success:
+                logger.warning("Failed to load rollout schedule, defaulting to None")
+                return None
         
         return self._rollout_schedule
