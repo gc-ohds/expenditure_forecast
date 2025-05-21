@@ -1,0 +1,56 @@
+# Copy base structure from simple_scenario.yaml but keep just one region
+regions:
+  - region_id: "test"
+    region_name: "Test Region"
+
+# Define segments for different cohorts
+population_segments:
+  - segment_id: "seniors_65plus_test"
+    cohort_type: "seniors"
+    region_id: "test"
+    age_min: 65
+    age_max: 120
+    age_bracket_name: "65plus"
+    population_size: 10000
+
+  - segment_id: "pwd_18to64_test"
+    cohort_type: "pwd"
+    region_id: "test"
+    age_min: 18
+    age_max: 64
+    age_bracket_name: "18to64"
+    population_size: 5000
+
+  - segment_id: "children_u18_test"
+    cohort_type: "children"
+    region_id: "test"
+    age_min: 0
+    age_max: 17
+    age_bracket_name: "u18"
+    population_size: 8000
+
+  - segment_id: "adults_18to64_test"
+    cohort_type: "adults"
+    region_id: "test"
+    age_min: 18
+    age_max: 64
+    age_bracket_name: "18to64"
+    population_size: 20000
+
+rollout_schedule_config: "default_rollout"
+
+# Set all application rates to zero to prevent state transitions
+flow_rates:
+  # Set all application rates to zero
+  new_applications: 0.0
+  new_applications_seniors_65plus: 0.0
+  new_applications_pwd_all: 0.0
+  new_applications_children_u18: 0.0
+  new_applications_adults_18to64: 0.0
+  
+  # For completeness, set other rates to zero too
+  new_re_enrollment_applications: 0.0
+  new_enrollments: 0.0
+  new_re_enrollment: 0.0
+  new_first_claimants: 0.0
+
