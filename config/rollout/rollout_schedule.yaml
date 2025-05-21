@@ -1,32 +1,47 @@
 # Default Rollout Schedule for OHB Program
 rollout_schedule:
-  - phase_id: "phase1"
+  - phase_id: "seniors_phase1"
     cohort_id: "seniors"
     age_min: 65
     age_max: 120
     start_date: "2025-04-01"
     description: "Seniors 65+ initial rollout"
 
-  - phase_id: "phase2"
+  - phase_id: "pwd_phase1"
     cohort_id: "pwd"
     age_min: 18
     age_max: 64
-    start_date: "2025-05-01"
+    start_date: "2025-04-01"
     description: "Persons with disabilities aged 18-64"
 
-  - phase_id: "phase3"
+  - phase_id: "children_phase1"
     cohort_id: "children"
     age_min: 0
     age_max: 17
-    start_date: "2025-06-01"
+    start_date: "2025-04-01"
     description: "Children under 18"
-
-  - phase_id: "phase4"
+  
+  # Phased rollout for adults cohort
+  - phase_id: "adults_phase1"
+    cohort_id: "adults"
+    age_min: 55
+    age_max: 64
+    start_date: "2025-05-01"
+    description: "Adults aged 55-64"
+  
+  - phase_id: "adults_phase2"
     cohort_id: "adults"
     age_min: 18
-    age_max: 64
-    start_date: "2025-07-01"
-    description: "Adults aged 18-64 (general population)"
+    age_max: 34
+    start_date: "2025-05-15"
+    description: "Adults aged 18-34"
+  
+  - phase_id: "adults_phase3"
+    cohort_id: "adults"
+    age_min: 35
+    age_max: 54
+    start_date: "2025-05-29"
+    description: "Adults aged 35-54"
 
 # Application rates by cohort
 application_rates:

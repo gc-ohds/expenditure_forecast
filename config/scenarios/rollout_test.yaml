@@ -29,15 +29,31 @@ population_segments:
     age_bracket_name: "u18"
     population_size: 8000
 
-  - segment_id: "adults_18to64_test"
+  - segment_id: "adults_55to64_test"
+    cohort_type: "adults"
+    region_id: "test"
+    age_min: 55
+    age_max: 64
+    age_bracket_name: "55to64"
+    population_size: 5000
+
+  - segment_id: "adults_18to34_test"
     cohort_type: "adults"
     region_id: "test"
     age_min: 18
-    age_max: 64
-    age_bracket_name: "18to64"
-    population_size: 20000
+    age_max: 34
+    age_bracket_name: "18to34"
+    population_size: 10000
 
-rollout_schedule_config: "default_rollout"
+  - segment_id: "adults_35to54_test"
+    cohort_type: "adults"
+    region_id: "test"
+    age_min: 35
+    age_max: 54
+    age_bracket_name: "35to54"
+    population_size: 5000
+
+rollout_schedule_config: "rollout_schedule"
 
 # Set all application rates to zero to prevent state transitions
 flow_rates:
