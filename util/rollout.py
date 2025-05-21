@@ -52,7 +52,8 @@ class RolloutPhase:
     
     def matches_cohort_and_age(self, cohort_id, age):
         """Check if the phase matches the specified cohort and age."""
-        result = (self.cohort_id == cohort_id and 
+        cohort_match = (self.cohort_id == "ALL" or self.cohort_id == cohort_id)
+        result = (cohort_match and 
                 age >= self.age_min and 
                 age <= self.age_max)
         logger.debug(f"Phase {self.phase_id} match check: cohort={cohort_id}=={self.cohort_id}, " 
