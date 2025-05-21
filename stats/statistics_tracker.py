@@ -43,6 +43,9 @@ class StatisticsTracker:
         period = time_manager.get_current_period()
         new_metrics = []
         
+        # Reset existing state metrics for this period to avoid duplication
+        self.metrics = [m for m in self.metrics if not (m['type'] == 'state' and m['period'] == period)]
+        
         # Calculate total population across all regions first
         total_by_state = defaultdict(int)
         total_by_state_cohort = defaultdict(lambda: defaultdict(int))
