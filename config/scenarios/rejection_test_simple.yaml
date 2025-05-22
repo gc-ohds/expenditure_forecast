@@ -1,0 +1,38 @@
+# Simple rejection test scenario
+regions:
+  - region_id: "test_region"
+    region_name: "Test Region"
+
+# Single population segment with 100 people
+population_segments:
+  - segment_id: "test_segment"
+    cohort_type: "test_cohort"
+    region_id: "test_region"
+    age_min: 0
+    age_max: 100
+    age_bracket_name: "all_ages"
+    population_size: 100
+
+# Flow rates for clear testing
+flow_rates:
+  # Everyone applies (100% application rate)
+  new_applications: 1.0
+  
+  # 30% approval rate (70% rejection rate)
+  new_enrollments: 0.30
+  
+  # Disable other flows for simplicity
+  new_re_enrollment_applications: 0.0
+  new_re_enrollment: 0.0
+  new_first_claimants: 0.0
+
+# Use simple rollout (everyone eligible from start)
+rollout_schedule_config: "simple_rollout"
+
+# Disable randomization for predictable results
+distributions:
+  new_applications_distribution:
+    type: "normal"
+    params:
+      mean: 1.0
+      stddev: 0.0  # No variation

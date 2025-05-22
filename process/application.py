@@ -494,10 +494,10 @@ class ApplicationProcessor(ProcessStep):
             approvals = success_count
             rejections = application_count - approvals
         
-        # Process rejections (source -> eligible)
+        # Process rejections (source -> non_eligible)
         if rejections > 0:
             rej_success, _, _ = population_segment.transition_population(
-                self.source_state, "eligible", rejections
+                self.source_state, "non_eligible", rejections
             )
             rejections = rej_success
         
@@ -541,10 +541,10 @@ class ApplicationProcessor(ProcessStep):
             approvals = success_count
             rejections = application_count - approvals
         
-        # Process rejections (source -> re_enrollment_eligible)
+        # Process rejections (source -> non_eligible)
         if rejections > 0:
             rej_success, _, _ = population_segment.transition_population(
-                self.source_state, "re_enrollment_eligible", rejections
+                self.source_state, "non_eligible", rejections
             )
             rejections = rej_success
         

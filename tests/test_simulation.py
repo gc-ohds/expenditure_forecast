@@ -53,7 +53,8 @@ class TestSimulation(unittest.TestCase):
                 're_enrollment_eligible_population': {'id': 're_enrollment_eligible', 'name': 'Re-enrollment Eligible', 'reset_on_fiscal_year': False},
                 'applied_population': {'id': 'applied', 'name': 'Applied Population', 'reset_on_fiscal_year': False},
                 'enrolled_inactive_population': {'id': 'enrolled_inactive', 'name': 'Enrolled Inactive', 'reset_on_fiscal_year': True},
-                'active_claimant_population': {'id': 'active_claimant', 'name': 'Active Claimant', 'reset_on_fiscal_year': True}
+                'active_claimant_population': {'id': 'active_claimant', 'name': 'Active Claimant', 'reset_on_fiscal_year': True},
+                'non_eligible_population': {'id': 'non_eligible', 'name': 'Non-Eligible Population', 'reset_on_fiscal_year': False}
             },
             'flows': {
                 'new_applications': {'id': 'new_applications', 'source': 'eligible', 'target': 'applied'},
@@ -125,7 +126,7 @@ class TestSimulation(unittest.TestCase):
         self.assertEqual(segment.population_size, 1000)
         
         # Check states are initialized
-        self.assertEqual(len(segment.states), 5)
+        self.assertEqual(len(segment.states), 6)
         self.assertEqual(segment.get_state_population('eligible'), 1000)
     
     def test_run_simulation(self):

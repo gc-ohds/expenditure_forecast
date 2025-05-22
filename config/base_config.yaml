@@ -32,6 +32,11 @@ states:
     id: "active_claimant"
     name: "Active Claimant Population"
     reset_on_fiscal_year: true
+  
+  non_eligible_population:
+    id: "non_eligible"
+    name: "Non-Eligible Population"
+    reset_on_fiscal_year: false
 
 # Flows between states
 flows:
@@ -59,6 +64,16 @@ flows:
     id: "new_first_claimants"
     source: "enrolled_inactive"
     target: "active_claimant"
+  
+  new_rejections:
+    id: "new_rejections"
+    source: "applied"
+    target: "non_eligible"
+    
+  new_re_enrollment_rejections:
+    id: "new_re_enrollment_rejections"
+    source: "applied"
+    target: "non_eligible"
 
 # Default flow rates
 flow_rates:

@@ -595,6 +595,10 @@ class StatisticsTracker:
         financial_metrics = self.calculate_derived_financial_metrics(period)
         derived_metrics.extend(financial_metrics)
         
+        # Calculate rejection-derived metrics
+        rejection_metrics = self.calculate_rejection_metrics(period)
+        derived_metrics.extend(rejection_metrics)
+        
         # Update cumulative expenditure
         cumulative_metrics = self.update_cumulative_expenditure(time_manager)
         
@@ -791,6 +795,51 @@ class StatisticsTracker:
         
         return enrollment_metrics
 
+    def calculate_rejection_metrics(self, period):
+        """
+        Calculate rejection-specific metrics.
+        
+        Args:
+            period (str): Time period identifier.
+            
+        Returns:
+            list: List of rejection metric records.
+        """
+        rejection_metrics = []
+        
+        # Get all dimensions
+        dimensions = self._get_all_dimensions()
+        
+        for dim in dimensions:
+            region_id, cohort_type, age_bracket, segment_id = dim
+            
+            # Calculate rejection rate (non_eligible transitions / applications)
+            non_eligible_key = f"state:non_eligible:{period}:{region_id}:{cohort_type}:{age_bracket}:{segment_id}"
+            applications_key = f"flow:new_applications:{period}:{region_id}:{cohort_type}:{age_bracket}:{segment_id}"
+            
+            non_eligible = self._metric_cache.get(non_eligible_key, 0)
+            applications = self._metric_cache.get(applications_key, 0)
+            
+            if applications > 0 and non_eligible > 0:
+                rejection_rate = non_eligible / applications
+                
+                # Add rejection_rate metric
+                rejection_metrics.append({
+                    "type": "derived",
+                    "id": "rejection_rate",
+                    "period": period,
+                    "region": region_id,
+                    "cohort": cohort_type,
+                    "age_bracket": age_bracket,
+                    "segment": segment_id,
+                    "value": rejection_rate
+                })
+                
+                # Update cache
+                self._metric_cache[f"derived:rejection_rate:{period}:{region_id}:{cohort_type}:{age_bracket}:{segment_id}"] = rejection_rate
+        
+        return rejection_metrics
+    
     def export_to_csv(self, base_path):
         """
         Export metrics to CSV files, grouped by metric type.

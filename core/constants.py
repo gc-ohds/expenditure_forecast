@@ -10,6 +10,8 @@ STATE_RE_ENROLLMENT_ELIGIBLE = "re_enrollment_eligible"
 STATE_APPLIED = "applied"
 STATE_ENROLLED_INACTIVE = "enrolled_inactive"
 STATE_ACTIVE_CLAIMANT = "active_claimant"
+STATE_NON_ELIGIBLE = "non_eligible"
+
 
 # Flow identifiers
 FLOW_NEW_APPLICATIONS = "new_applications"

@@ -140,7 +140,7 @@ class PopulationSegment:
             bool: True if all required states are present, False otherwise.
         """
         required_states = ['eligible', 're_enrollment_eligible', 'applied', 
-                          'enrolled_inactive', 'active_claimant']
+                          'enrolled_inactive', 'active_claimant', 'non_eligible']
         
         missing_states = [state for state in required_states if state not in self.states]
         
