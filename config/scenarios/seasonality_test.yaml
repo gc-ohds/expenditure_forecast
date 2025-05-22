@@ -19,7 +19,7 @@ flow_rates:
   new_applications: 0.10  # This is the baseline rate
   
   # Set all other rates to zero to prevent state transitions
-  new_enrollments: 0.0
+  new_enrollments: 1.0
   new_re_enrollment: 0.0
   new_first_claimants: 0.0
   new_re_enrollment_applications: 0.0

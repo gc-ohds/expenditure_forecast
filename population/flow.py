@@ -144,11 +144,11 @@ class PopulationFlow:
         
         # In Phase 1, implement a simple time-based adjustment
         # Later phases can implement more sophisticated adjustments
-        month = time_manager.current_date.month
+        # month = time_manager.current_date.month
         
-        # Simple seasonal adjustment - higher rates in Q1 and Q3
-        if month in [1, 2, 3, 7, 8, 9]:
-            rate = rate * 1.1
+        # # Simple seasonal adjustment - higher rates in Q1 and Q3
+        # if month in [1, 2, 3, 7, 8, 9]:
+        #     rate = rate * 1.1
         
         return min(1.0, rate)
     

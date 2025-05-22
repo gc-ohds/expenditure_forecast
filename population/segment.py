@@ -179,31 +179,39 @@ class PopulationSegment:
         Returns:
             tuple: (success_count, source_state, target_state)
         """
+        print(f"DEBUG TRANSITION: {from_state_id} → {to_state_id}, count={count}")
+        
         if from_state_id not in self.states:
-            logger.warning(f"Source state {from_state_id} not found in segment {self.segment_id}")
+            print(f"DEBUG: Source state {from_state_id} not found in {list(self.states.keys())}")
             return 0, None, None
         
         if to_state_id not in self.states:
-            logger.warning(f"Target state {to_state_id} not found in segment {self.segment_id}")
+            print(f"DEBUG: Target state {to_state_id} not found in {list(self.states.keys())}")
             return 0, None, None
         
         source_state = self.states[from_state_id]
         target_state = self.states[to_state_id]
         
         available = source_state.get_population()
+        print(f"DEBUG: Available population in {from_state_id}: {available}")
+        
         if count > available:
             count = available
-            logger.warning(
-                f"Transition request for {count} exceeds available "
-                f"population {available} in state {from_state_id}"
-            )
+            print(f"DEBUG: Reducing count to available: {count}")
         
         if count <= 0:
+            print(f"DEBUG: No population to move")
             return 0, source_state, target_state
+        
+        # BEFORE transition
+        print(f"DEBUG BEFORE: {from_state_id}={source_state.get_population()}, {to_state_id}={target_state.get_population()}")
         
         # Perform the transition
         source_state.update_population(-count)
         target_state.update_population(count)
+        
+        # AFTER transition
+        print(f"DEBUG AFTER: {from_state_id}={source_state.get_population()}, {to_state_id}={target_state.get_population()}")
         
         return count, source_state, target_state
     

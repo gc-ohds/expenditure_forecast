@@ -287,10 +287,10 @@ class Simulation:
             all_results.extend(app_proc_results)
             
             # Existing population flow processing
-            flow_results = region.process_population_flows(
-                self.time_manager, self.config_manager
-            )
-            all_results.extend(flow_results)
+            # flow_results = region.process_population_flows(
+            #     self.time_manager, self.config_manager
+            # )
+            # all_results.extend(flow_results)
         
         # Update state metrics after all flows
         self.statistics_tracker.update_state_metrics(self.regions, self.time_manager)

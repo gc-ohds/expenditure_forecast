@@ -105,7 +105,10 @@ class ApplicationGenerator(ProcessStep):
         # Get eligible population count
         eligible_population = population_segment.get_state_population(self.source_state)
         
+        print(f"DEBUG: Eligible population for {population_segment.segment_id}: {eligible_population}")
+        
         if eligible_population <= 0:
+            print(f"DEBUG: No eligible population, returning 0 applications")
             return 0
         
         # Get application rate for this segment
@@ -113,24 +116,36 @@ class ApplicationGenerator(ProcessStep):
             population_segment, time_manager, config_manager
         )
         
+        print(f"DEBUG: Base rate for {population_segment.segment_id}: {base_rate}")
+        
         # Apply seasonal factors
         adjusted_rate = self.apply_seasonal_factors(base_rate, time_manager, population_segment, config_manager)
+        
+        print(f"DEBUG: Adjusted rate after seasonal factors: {adjusted_rate}")
         
         # Apply distribution variation if available
         final_rate = self._apply_rate_distribution(
             adjusted_rate, population_segment, time_manager, config_manager
         )
         
+        print(f"DEBUG: Final rate after distribution: {final_rate}")
+        
         # Calculate the number of applications
         applications = int(round(eligible_population * final_rate))
         
+        print(f"DEBUG: Calculated applications: {applications}")
+        
         # Ensure applications don't exceed eligible population
         applications = min(applications, eligible_population)
+        
+        print(f"DEBUG: Applications after min check: {applications}")
         
         # Perform state transition
         success_count, _, _ = population_segment.transition_population(
             self.source_state, self.target_state, applications
         )
+        
+        print(f"DEBUG: Successful transitions: {success_count}")
         
         return success_count
     
@@ -249,18 +264,28 @@ class ApplicationGenerator(ProcessStep):
         month = time_manager.current_date.month
         cohort_type = population_segment.cohort_type
         
-        # Get cohort-specific seasonal factors from configuration
+        # Debug logging
         merged_config = config_manager.get_merged_config()
-        if 'application_rates' in merged_config and cohort_type in merged_config['application_rates']:
-            cohort_config = merged_config['application_rates'][cohort_type]
-            if 'seasonal_factors' in cohort_config and str(month) in cohort_config['seasonal_factors']:
-                factor = cohort_config['seasonal_factors'][str(month)]
-                return base_rate * factor
+        print(f"Month: {month}, Cohort: {cohort_type}")
+        print(f"Merged config has application_rates: {'application_rates' in merged_config}")
         
-        # Match your test config
-        if month == 1:  # January
+        if 'application_rates' in merged_config:
+            print(f"Available cohorts: {list(merged_config['application_rates'].keys())}")
+            if cohort_type in merged_config['application_rates']:
+                cohort_config = merged_config['application_rates'][cohort_type]
+                print(f"Cohort config: {cohort_config}")
+                if 'seasonal_factors' in cohort_config:
+                    print(f"Seasonal factors: {cohort_config['seasonal_factors']}")
+                    if month in cohort_config['seasonal_factors']:
+                        factor = cohort_config['seasonal_factors'][month]
+                        print(f"Applying factor {factor} for month {month}")
+                        return base_rate * factor
+        
+        # Fallback
+        print(f"Using fallback logic for month {month}")
+        if month == 1:
             return base_rate * 2.0
-        elif month == 7:  # July
+        elif month == 7:
             return base_rate * 0.5
         else:
             return base_rate
