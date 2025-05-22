@@ -1,0 +1,7 @@
+rollout_schedule:
+  - phase_id: "single_phase"
+    cohort_id: "test_cohort"
+    age_min: 0
+    age_max: 100
+    start_date: "2025-04-01"
+    description: "Single rollout phase for all test cohort"
